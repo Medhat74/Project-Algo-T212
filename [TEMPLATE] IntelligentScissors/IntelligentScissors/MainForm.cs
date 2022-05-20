@@ -31,9 +31,6 @@ namespace IntelligentScissors
         private List<Point> fullPathPoints = new List<Point>();
         Point[] liveWirePoints;
         
-
-
-
         private void btnOpen_Click(object sender, EventArgs e)
         {
             OpenFileDialog openFileDialog1 = new OpenFileDialog();
@@ -82,6 +79,7 @@ namespace IntelligentScissors
             if (anchorPoint != -1)
             {
                 currentPoint = Graphs.getIndex(current_X_Position, current_Y_Position);
+                //Graphs.shortestPathTwoPoints(liveWireAnchor, currentPoint);
                 liveWire = Graphs.getPath(liveWireAnchor, currentPoint);
                 if (liveWire != null)
                 {
@@ -123,7 +121,7 @@ namespace IntelligentScissors
         private void putAnchor(int atPoint)
         {
             
-            //path = Graphs.getPath(anchorPoint, freePoint);
+            path = Graphs.getPath(anchorPoint, atPoint);
             if (Graphs.isValidPoint(atPoint))
             {
                 if (isDoubleClick)
@@ -138,9 +136,10 @@ namespace IntelligentScissors
                 }
                 else
                 {
-                    for (int i = liveWirePoints.Length - 1; i >= 0; i--)
+                    for (int i = path.Count - 1; i >= 0; i--)
                     {
-                        fullPathPoints.Add(liveWirePoints[i]);
+                        fullPathPoints.Add(Graphs.nodeOfIndex(path[i]));
+                        //fullPathPoints.Add(liveWirePoints[i]);
                     }
                 }
                 

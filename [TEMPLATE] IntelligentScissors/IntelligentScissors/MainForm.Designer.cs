@@ -293,7 +293,7 @@ namespace IntelligentScissors
             0,
             0});
             this.frequencyValue.Minimum = new decimal(new int[] {
-            50,
+            55,
             0,
             0,
             0});
@@ -301,7 +301,7 @@ namespace IntelligentScissors
             this.frequencyValue.Size = new System.Drawing.Size(94, 27);
             this.frequencyValue.TabIndex = 10;
             this.frequencyValue.Value = new decimal(new int[] {
-            85,
+            70,
             0,
             0,
             0});
