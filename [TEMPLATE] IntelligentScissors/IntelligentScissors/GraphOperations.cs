@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Drawing;
 using static IntelligentScissors.GraphOperations;
 
 namespace IntelligentScissors
@@ -15,28 +16,29 @@ namespace IntelligentScissors
         public static int width;
         public static int height;
         public static List<int> parent;
-        public class Node
-        {
-            public Node() { }
-            public Node(int x, int y)
-            {
-                X = x;
-                Y = y;
-            }
-            public int X { get; set; }
-            public int Y { get; set; }
-            public int getIndex()
-            {
-                return (width * Y) + X;
-            }
-        }
+        public static List<bool> visited;
+        //public class Node
+        //{
+        //    public Node() { }
+        //    public Node(int x, int y)
+        //    {
+        //        X = x;
+        //        Y = y;
+        //    }
+        //    public int X { get; set; }
+        //    public int Y { get; set; }
+        //    public int getIndex()
+        //    {
+        //        return (width * Y) + X;
+        //    }
+        //}
         public class CostDestPair
         {
             public CostDestPair() { }
-            public CostDestPair(double cost, Node node)
+            public CostDestPair(double cost, Point node)
             {
                 this.cost = cost;
-                this.destination = node.getIndex();
+                this.destination = getIndex(node.X, node.Y);
             }
             public CostDestPair(double cost, int x, int y)
             {
@@ -47,16 +49,17 @@ namespace IntelligentScissors
             public int destination { get; set; }
         }
 
-        public static Node nodeOfIndex(int index)
+        public static Point nodeOfIndex(int index)
         {
             int x = index % width;
             int y = (index - x) / width;
-            return new Node(x, y);
+            return new Point(x, y);
         }
         public static int getIndex(int x, int y)
         {
             return (width * y) + x;
         }
+        
         public static void generateGraph(RGBPixel[,] ImageMatrix)
         {
             graph = new Graph();
@@ -120,23 +123,46 @@ namespace IntelligentScissors
             }
         }
 
-        public static List<int> shortestPath(int anchorPoint, int freePoint)
+        public static List<int> getPath(int anchorPoint, int freePoint)
+        {
+            if (!visited[freePoint])
+            {
+                Console.WriteLine("invalid free point try againt!");
+                return null;
+            }
+
+            List<int> path = new List<int>();
+            int nodesOfPath = freePoint;
+            while (parent[nodesOfPath] != anchorPoint)
+            {
+                path.Add(nodesOfPath);
+                nodesOfPath = parent[nodesOfPath];
+            }
+            path.Add(nodesOfPath);
+            path.Add(anchorPoint);
+            return path;
+        }
+
+        public static void shortestPath(int anchorPoint)
         {
             int size = width * height;
             int count = 0;
-            CostDestPair pair = new CostDestPair(5, 2, 0);
+
+
             List<double> cost = new List<double>(Enumerable.Repeat(INF, size).ToArray());
             parent = new List<int>(Enumerable.Repeat(-1, size).ToArray());
-            List<bool> visited = new List<bool>(Enumerable.Repeat(false, size).ToArray());
+            visited = new List<bool>(Enumerable.Repeat(false, size).ToArray());
             //node, cost 
             PriorityQueue<int, double> nextToVisit = new PriorityQueue<int, double>();
+
+
             cost[anchorPoint] = 0;
             parent[anchorPoint] = anchorPoint;
             nextToVisit.Enqueue(anchorPoint, 0);
             while (nextToVisit.Count > 0)
             {
-                if (visited[freePoint])
-                    break;
+                //if (visited[freePoint])
+                //    break;
                 int node = nextToVisit.Dequeue();
                 if (visited[node])
                     continue;
@@ -153,24 +179,7 @@ namespace IntelligentScissors
                         nextToVisit.Enqueue(destination, cost[destination]);
                     }
                 }
-            }
-            List<int> path = new List<int>();
-            if (!visited[freePoint])
-            {
-                Console.WriteLine("invalid free point try againt!");
-                return path;
-            }
-
-            //Get Path
-            int nodesOfPath = freePoint;
-            while (parent[nodesOfPath] != anchorPoint)
-            {
-                path.Add(nodesOfPath);
-                nodesOfPath = parent[nodesOfPath];
-            }
-            path.Add(nodesOfPath);
-            path.Add(anchorPoint);
-            return path;
+            }   
         }
     }
 }
