@@ -10,10 +10,11 @@ namespace IntelligentScissors
     using Graph = Dictionary<int, List<CostDestPair>>;
     internal class GraphOperations
     {
-        private const double INF = long.MaxValue;
+        private const double INF = double.PositiveInfinity;
         public static Graph graph;
         public static int width;
         public static int height;
+        public static List<int> parent;
         public class Node
         {
             public Node() { }
@@ -119,13 +120,13 @@ namespace IntelligentScissors
             }
         }
 
-        public static void shortestPath(int anchorPoint, int freePoint)
+        public static List<int> shortestPath(int anchorPoint, int freePoint)
         {
             int size = width * height;
             int count = 0;
             CostDestPair pair = new CostDestPair(5, 2, 0);
             List<double> cost = new List<double>(Enumerable.Repeat(INF, size).ToArray());
-            List<int> parent = new List<int>(Enumerable.Repeat(-1, size).ToArray());
+            parent = new List<int>(Enumerable.Repeat(-1, size).ToArray());
             List<bool> visited = new List<bool>(Enumerable.Repeat(false, size).ToArray());
             //node, cost 
             PriorityQueue<int, double> nextToVisit = new PriorityQueue<int, double>();
@@ -134,6 +135,8 @@ namespace IntelligentScissors
             nextToVisit.Enqueue(anchorPoint, 0);
             while (nextToVisit.Count > 0)
             {
+                if (visited[freePoint])
+                    break;
                 int node = nextToVisit.Dequeue();
                 if (visited[node])
                     continue;
@@ -151,8 +154,14 @@ namespace IntelligentScissors
                     }
                 }
             }
-
             List<int> path = new List<int>();
+            if (!visited[freePoint])
+            {
+                Console.WriteLine("invalid free point try againt!");
+                return path;
+            }
+
+            //Get Path
             int nodesOfPath = freePoint;
             while (parent[nodesOfPath] != anchorPoint)
             {
@@ -161,20 +170,7 @@ namespace IntelligentScissors
             }
             path.Add(nodesOfPath);
             path.Add(anchorPoint);
-
-            //Node position;
-            //for (int i = 0; i < (width*height); i++)
-            //{
-            //    position = nodeOfIndex(i);
-            //    Console.WriteLine("Node  " + parent[i] + "  at position  ( " + position.X + ", " + position.Y + " )");
-            //}
-
-            Node position;
-            for (int i = 0; i < path.Count; i++)
-            {
-                position = nodeOfIndex(i);
-                Console.WriteLine("Node  " + path[i] + "  at position  ( " + position.X + ", " + position.Y + " )");
-            }
+            return path;
         }
     }
 }
