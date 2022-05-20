@@ -10,6 +10,7 @@ namespace IntelligentScissors
     using Graph = Dictionary<int, List<CostDestPair>>;
     internal class GraphOperations
     {
+        private const double INF = long.MaxValue;
         public static Graph graph;
         public static int width;
         public static int height;
@@ -25,7 +26,7 @@ namespace IntelligentScissors
             public int Y { get; set; }
             public int getIndex()
             {
-                return (width * X) + Y;
+                return (width * Y) + X;
             }
         }
         public class CostDestPair
@@ -39,7 +40,7 @@ namespace IntelligentScissors
             public CostDestPair(double cost, int x, int y)
             {
                 this.cost = cost;
-                destination = getIndex(x,y);
+                destination = getIndex(x, y);
             }
             public double cost { get; set; }
             public int destination { get; set; }
@@ -53,7 +54,7 @@ namespace IntelligentScissors
         }
         public static int getIndex(int x, int y)
         {
-            return (width * x) + y;
+            return (width * y) + x;
         }
         public static void generateGraph(RGBPixel[,] ImageMatrix)
         {
@@ -75,42 +76,108 @@ namespace IntelligentScissors
                     //graph[(X,Y)] is the node
                     //has list of ( cost, destination node )
                     // ( cost, (X,Y) )
-                    Vector2D cost = ImageOperations.CalculateGradientAtPixel(x, y, ImageMatrix);
+
+                    Vector2D cost = ImageOperations.CalculatePixelEnergies(x, y, ImageMatrix);
+
                     if ((x == width - 1) && (y < height - 1))
                     {
-                        graph[getIndex(x, y)].Add(new CostDestPair(cost.Y, x, y + 1));
-                        graph[getIndex(x, y + 1)].Add(new CostDestPair(cost.Y, x, y));
+                        //No Right Nodes only store Bottom cost
+                        graph[getIndex(x, y)].Add(new CostDestPair(1 / cost.Y, x, y + 1));
+                        graph[getIndex(x, y + 1)].Add(new CostDestPair(1 / cost.Y, x, y));
+
                     }
                     else if ((x < width - 1) && (y == height - 1))
                     {
-                        graph[getIndex(x, y)].Add(new CostDestPair(cost.X, x + 1, y));
-                        graph[getIndex(x + 1, y)].Add(new CostDestPair(cost.X, x, y));
+                        //No Bottom Nodes only store Right cost
+                        graph[getIndex(x, y)].Add(new CostDestPair(1 / cost.X, x + 1, y));
+                        graph[getIndex(x + 1, y)].Add(new CostDestPair(1 / cost.X, x, y));
+
                     }
                     else if ((x < width - 1) && (y < height - 1))
                     {
-                        graph[getIndex(x, y)].Add(new CostDestPair(cost.X, x + 1, y));
-                        graph[getIndex(x, y)].Add(new CostDestPair(cost.Y, x, y + 1));
-                        graph[getIndex(x + 1, y)].Add(new CostDestPair(cost.X, x, y));
-                        graph[getIndex(x, y + 1)].Add(new CostDestPair(cost.Y, x, y));
+
+                        graph[getIndex(x, y)].Add(new CostDestPair(1 / cost.X, x + 1, y));
+                        graph[getIndex(x, y)].Add(new CostDestPair(1 / cost.Y, x, y + 1));
+                        graph[getIndex(x + 1, y)].Add(new CostDestPair(1 / cost.X, x, y));
+                        graph[getIndex(x, y + 1)].Add(new CostDestPair(1 / cost.Y, x, y));
+
                     }
                 }
             }
         }
+
         public static void printGraph()
         {
-            Node node;
             for (int i = 0; i < (width * height); i++)
             {
-                node = nodeOfIndex(i);
-                Console.WriteLine("\n\nThe  index node " + i+"\nEdges");
+                Console.WriteLine("\n\nThe  index node " + i + "\nEdges");
                 foreach (CostDestPair child in graph[i])
                 {
                     //Console.WriteLine(graph[i].Count);
-                    Console.WriteLine("edge from   "+i+"  To  "+child.destination+ "  With Weights  "+child.cost);
+                    Console.WriteLine("edge from   " + i + "  To  " + child.destination + "  With Weights  " + child.cost);
                 }
             }
         }
 
+        public static void shortestPath(int anchorPoint, int freePoint)
+        {
+            int size = width * height;
+            int count = 0;
+            CostDestPair pair = new CostDestPair(5, 2, 0);
+            List<double> cost = new List<double>(Enumerable.Repeat(INF, size).ToArray());
+            List<int> parent = new List<int>(Enumerable.Repeat(-1, size).ToArray());
+            List<bool> visited = new List<bool>(Enumerable.Repeat(false, size).ToArray());
+            //node, cost 
+            PriorityQueue<int, double> nextToVisit = new PriorityQueue<int, double>();
+            cost[anchorPoint] = 0;
+            parent[anchorPoint] = anchorPoint;
+            nextToVisit.Enqueue(anchorPoint, 0);
+            while (nextToVisit.Count > 0)
+            {
+                int node = nextToVisit.Dequeue();
+                if (visited[node])
+                    continue;
+                visited[node] = true;
+                count++;
+                foreach (CostDestPair child in graph[node])
+                {
+                    double costOfChild = child.cost;
+                    int destination = child.destination;
+                    if (cost[node] + costOfChild < cost[destination])
+                    {
+                        cost[destination] = cost[node] + costOfChild;
+                        parent[destination] = node;
+                        nextToVisit.Enqueue(destination, cost[destination]);
+                    }
+                }
+            }
 
+            List<int> path = new List<int>();
+            int nodesOfPath = freePoint;
+            while (parent[nodesOfPath] != anchorPoint)
+            {
+                path.Add(nodesOfPath);
+                nodesOfPath = parent[nodesOfPath];
+            }
+            path.Add(nodesOfPath);
+            path.Add(anchorPoint);
+
+            //Node position;
+            //for (int i = 0; i < (width*height); i++)
+            //{
+            //    position = nodeOfIndex(i);
+            //    Console.WriteLine("Node  " + parent[i] + "  at position  ( " + position.X + ", " + position.Y + " )");
+            //}
+
+            Node position;
+            for (int i = 0; i < path.Count; i++)
+            {
+                position = nodeOfIndex(i);
+                Console.WriteLine("Node  " + path[i] + "  at position  ( " + position.X + ", " + position.Y + " )");
+            }
+        }
     }
 }
+
+
+    

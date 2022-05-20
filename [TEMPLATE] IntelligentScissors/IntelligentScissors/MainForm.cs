@@ -30,6 +30,7 @@ namespace IntelligentScissors
                 ImageMatrix = ImageOperations.OpenImage(OpenedFilePath);
                 ImageOperations.DisplayImage(ImageMatrix, pictureBox1);
             }
+            GraphOperations.generateGraph(ImageMatrix);
         }
 
         private void pictureBox1_MouseMove(object sender, MouseEventArgs e)
@@ -49,8 +50,8 @@ namespace IntelligentScissors
 
         private void pictureBox1_Click(object sender, EventArgs e)
         {
-            GraphOperations.generateGraph(ImageMatrix);
             GraphOperations.printGraph();
+           // GraphOperations.shortestPath(112, 43);
         }
     }
 }
