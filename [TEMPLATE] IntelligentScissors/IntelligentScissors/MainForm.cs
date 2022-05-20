@@ -20,28 +20,20 @@ namespace IntelligentScissors
         }
 
         RGBPixel[,] ImageMatrix;
-        bool drawLine = false, drawLiveWire = false, randomPoint = false;
-        public static int Current_X_Position, Current_Y_Position;
-        public static int Clicked_X_Position, Clicked_Y_Position;
-        private int anchorPoint = -1, freePoint = -1, currentPoint, liveWireAnchor;
+        bool isDrawLine = false, isDrawLiveWire = false, isDoubleClick = false, isAutoAnchor = false;
+        public static int current_X_Position, current_Y_Position, clicked_X_Position, clicked_Y_Position;
+        private int startPoint, anchorPoint = -1, freePoint = -1, currentPoint, liveWireAnchor, frequency;
         private List<int> path, liveWire;
         
         Pen drawPen = new Pen(Color.FromArgb(0, 255, 0), 2);
         Pen liveWirePen = new Pen(Color.FromArgb(255, 0, 0), 2);
 
-
         private List<Point> fullPathPoints = new List<Point>();
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            anchorPoint = -1;
-            drawLiveWire = false;
-            drawLine = false;
-            pictureBox1.Invalidate();
-        }
-
         Point[] liveWirePoints;
-        private List<int> fullPath = new List<int>();
+        
+
+
+
         private void btnOpen_Click(object sender, EventArgs e)
         {
             OpenFileDialog openFileDialog1 = new OpenFileDialog();
@@ -54,19 +46,42 @@ namespace IntelligentScissors
             }
             Graphs.generateGraph(ImageMatrix);
         }
+        private void btnClear_Click(object sender, EventArgs e)
+        {
+            anchorPoint = -1;
+            isDrawLiveWire = false;
+            isDrawLine = false;
+            isDoubleClick = false;
+            
+            pictureBox1.Invalidate();
+            fullPathPoints.Clear();
+            
 
+        }
+
+        private void btnAutoAnchor_Click(object sender, EventArgs e)
+        {
+            frequency = (int)frequencyValue.Value;
+            isAutoAnchor = true;
+        }
+
+        private void frequencyValue_ValueChanged(object sender, EventArgs e)
+        {
+            frequency = (int)frequencyValue.Value;
+            Console.WriteLine(frequency);
+        }
         private void pictureBox1_MouseMove(object sender, MouseEventArgs e)
         {
             
-            Current_X_Position = e.X;
-            Current_Y_Position = e.Y;
+            current_X_Position = e.X;
+            current_Y_Position = e.Y;
             textOriginalX.Text = e.X.ToString();
             textOriginalY.Text = e.Y.ToString();
-            textPixelNum.Text = Graphs.getIndex(Current_X_Position, Current_Y_Position).ToString();
+            textPixelNum.Text = Graphs.getIndex(current_X_Position, current_Y_Position).ToString();
 
             if (anchorPoint != -1)
             {
-                currentPoint = Graphs.getIndex(Current_X_Position, Current_Y_Position);
+                currentPoint = Graphs.getIndex(current_X_Position, current_Y_Position);
                 liveWire = Graphs.getPath(liveWireAnchor, currentPoint);
                 if (liveWire != null)
                 {
@@ -77,98 +92,104 @@ namespace IntelligentScissors
                     }
                     
                 }
-                //else
-                //    randomPoint = true;
+                
                 pictureBox1.Invalidate();  
             }
         }
 
         private void pictureBox1_MouseClick(object sender, MouseEventArgs e)
         {
-            Clicked_X_Position = e.X;
-            Clicked_Y_Position = e.Y;
+            clicked_X_Position = e.X;
+            clicked_Y_Position = e.Y;
 
             // Frist click
             if (anchorPoint == -1)
             {
-                drawLiveWire = true;
-                anchorPoint = Graphs.getIndex(Clicked_X_Position, Clicked_Y_Position);
-                liveWireAnchor = anchorPoint;
+                isDrawLiveWire = true;
+                anchorPoint = Graphs.getIndex(clicked_X_Position, clicked_Y_Position);
+                liveWireAnchor = startPoint = anchorPoint;
                 Console.WriteLine("anchor point   " + anchorPoint);
                 Graphs.shortestPath(anchorPoint);
             }
-            else
+            
+            else if(!isAutoAnchor)
             {
-                freePoint = Graphs.getIndex(Clicked_X_Position, Clicked_Y_Position);
+                freePoint = Graphs.getIndex(clicked_X_Position, clicked_Y_Position);
                 Console.WriteLine("free point   " + freePoint);
-                //Graphs.shortestPath(freePoint);
-                path = Graphs.getPath(anchorPoint, freePoint);
+                putAnchor(freePoint);
+            }
+        }
 
-                if (path != null)
+        private void putAnchor(int atPoint)
+        {
+            
+            //path = Graphs.getPath(anchorPoint, freePoint);
+            if (Graphs.isValidPoint(atPoint))
+            {
+                if (isDoubleClick)
                 {
-                    Console.WriteLine("coming");
+                    path = Graphs.getPath(anchorPoint, atPoint);
                     Point point;
                     for (int i = path.Count - 1; i >= 0; i--)
                     {
-                        Console.WriteLine("having path");
-
                         point = Graphs.nodeOfIndex(path[i]);
                         fullPathPoints.Add(point);
                     }
-
-                    Console.WriteLine("path is done");
-
-                    drawLine = true;
-
-
-                    pictureBox1.Invalidate();
-
-                    //New Anchor Point
-                    anchorPoint = freePoint;
-                    liveWireAnchor = anchorPoint;
-                    Graphs.shortestPath(anchorPoint);
-                    fullPath.AddRange(path);
                 }
                 else
-                    Console.WriteLine("saaaaaaaaaadddddd");
+                {
+                    for (int i = liveWirePoints.Length - 1; i >= 0; i--)
+                    {
+                        fullPathPoints.Add(liveWirePoints[i]);
+                    }
+                }
+                
+
+                isDrawLine = true;
+                pictureBox1.Invalidate();
+
+                //New Anchor Point
+                anchorPoint = liveWireAnchor = atPoint;
+                //liveWireAnchor = anchorPoint;
+                Graphs.shortestPathTwoPoints(anchorPoint, startPoint);
             }
         }
-        private void pictureBox1_Click(object sender, EventArgs e)
-        {
-            //if (!click2)
-            //    click1 = true;
 
-            
-
-            //Graphs.printGraph();
-        }
         private void pictureBox1_Paint(object sender, PaintEventArgs e)
         {
-            
-            
-            if(drawLiveWire)
+
+            if (isDrawLiveWire)
             {
-                if (drawLine)
+                if (isDrawLine)
                 {
                     Console.WriteLine("draw green");
 
                     e.Graphics.DrawLines(drawPen, fullPathPoints.ToArray());
                 }
                 if (liveWirePoints != null)
+                {
                     e.Graphics.DrawLines(liveWirePen, liveWirePoints);
+                    if (isAutoAnchor)
+                    {
+                        for (int i = 0; i < liveWirePoints.Length / frequency; i++)
+                        {
+                            putAnchor(Graphs.getIndex(liveWirePoints[frequency * i].X, liveWirePoints[frequency * i].Y));
+                        }
+                    }
+                }
 
-                //if (randomPoint)
-                //{
-                    e.Graphics.DrawLine(liveWirePen, liveWirePoints[0].X,
-                    liveWirePoints[0].Y, Current_X_Position, Current_Y_Position);
-                    randomPoint = false;
-                //}
+                e.Graphics.DrawLine(liveWirePen, liveWirePoints[0].X,
+                liveWirePoints[0].Y, current_X_Position, current_Y_Position);
+
             }
 
         }
 
         private void pictureBox1_DoubleClick(object sender, EventArgs e)
         {
+            isDoubleClick = true;
+            freePoint = startPoint;
+            putAnchor(startPoint);
             anchorPoint = -1;
         }
     }

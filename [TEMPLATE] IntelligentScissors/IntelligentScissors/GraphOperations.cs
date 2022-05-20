@@ -17,21 +17,7 @@ namespace IntelligentScissors
         public static int height;
         public static List<int> parent;
         public static List<bool> visited;
-        //public class Node
-        //{
-        //    public Node() { }
-        //    public Node(int x, int y)
-        //    {
-        //        X = x;
-        //        Y = y;
-        //    }
-        //    public int X { get; set; }
-        //    public int Y { get; set; }
-        //    public int getIndex()
-        //    {
-        //        return (width * Y) + X;
-        //    }
-        //}
+        
         public class CostDestPair
         {
             public CostDestPair() { }
@@ -123,9 +109,13 @@ namespace IntelligentScissors
             }
         }
 
+        public static bool isValidPoint(int point)
+        {
+            return visited[point];
+        }
         public static List<int> getPath(int anchorPoint, int freePoint)
         {
-            if (!visited[freePoint])
+            if (!isValidPoint(freePoint))
             {
                 Console.WriteLine("invalid free point try againt!");
                 return null;
@@ -180,6 +170,45 @@ namespace IntelligentScissors
                     }
                 }
             }   
+        }
+
+        public static void shortestPathTwoPoints(int anchorPoint, int freePoint)
+        {
+            int size = width * height;
+            int count = 0;
+
+
+            List<double> cost = new List<double>(Enumerable.Repeat(INF, size).ToArray());
+            parent = new List<int>(Enumerable.Repeat(-1, size).ToArray());
+            visited = new List<bool>(Enumerable.Repeat(false, size).ToArray());
+            //node, cost 
+            PriorityQueue<int, double> nextToVisit = new PriorityQueue<int, double>();
+
+
+            cost[anchorPoint] = 0;
+            parent[anchorPoint] = anchorPoint;
+            nextToVisit.Enqueue(anchorPoint, 0);
+            while (nextToVisit.Count > 0)
+            {
+                if (visited[freePoint])
+                    break;
+                int node = nextToVisit.Dequeue();
+                if (visited[node])
+                    continue;
+                visited[node] = true;
+                count++;
+                foreach (CostDestPair child in graph[node])
+                {
+                    double costOfChild = child.cost;
+                    int destination = child.destination;
+                    if (cost[node] + costOfChild < cost[destination])
+                    {
+                        cost[destination] = cost[node] + costOfChild;
+                        parent[destination] = node;
+                        nextToVisit.Enqueue(destination, cost[destination]);
+                    }
+                }
+            }
         }
     }
 }
