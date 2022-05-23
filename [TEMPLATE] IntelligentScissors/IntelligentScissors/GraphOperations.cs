@@ -17,7 +17,8 @@ namespace IntelligentScissors
         public static int height;
         public static List<int> parent;
         public static List<bool> visited;
-        
+        public static int size;
+
         public class CostDestPair
         {
             public CostDestPair() { }
@@ -51,6 +52,7 @@ namespace IntelligentScissors
             graph = new Graph();
             width = ImageOperations.GetWidth(ImageMatrix);
             height = ImageOperations.GetHeight(ImageMatrix);
+            size = width * height;
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
@@ -68,6 +70,12 @@ namespace IntelligentScissors
                     // ( cost, (X,Y) )
 
                     Vector2D cost = ImageOperations.CalculatePixelEnergies(x, y, ImageMatrix);
+                    //cost.X = 1 / cost.X;
+                    //cost.Y = 1 / cost.Y;
+                    //if (cost.X == (1.0 / 0.0))
+                    //    cost.X = 100E+1;
+                    //if (cost.Y == (1.0 / 0.0))
+                    //    cost.Y = 100E+1;
 
                     if ((x == width - 1) && (y < height - 1))
                     {
@@ -96,6 +104,55 @@ namespace IntelligentScissors
             }
         }
 
+
+        public static int getPoint(int anchorPoint)
+        {
+            Point point = nodeOfIndex(anchorPoint);
+
+            for (int n = 1; n <= 10; n++)
+            {
+                for (int i = point.Y - (10*n); i <= point.Y + (10*n); i++)
+                {
+                    for (int j = point.X - (10 * n); j <= point.X + (10*n); j++)
+                    {
+                        int index = getIndex(j, i);
+                        if (index < size && index > -1)
+                        {
+                            if (isValidPoint(index))
+                                return index;
+                        }
+                    }
+                }
+            }
+            return -1;
+        }
+
+        public static int getAnchorPoint(int anchorPoint)
+        {
+            Point point = nodeOfIndex(anchorPoint);
+            for (int n = 1; n <= 10; n++)
+            {
+                for (int i = point.Y - (10 * n); i <= point.Y + (10 * n); i++)
+                {
+                    for (int j = point.X - (10 * n); j <= point.X + (10 * n); j++)
+                    {
+                        int index = getIndex(j, i);
+                        if (index < size && index > -1)
+                        {
+                            if (isValidAnchorPoint(index))
+                                return index;
+                        }
+                    }
+                }
+            }
+            return -1;
+        }
+        public static bool isValidAnchorPoint(int anchor)
+        {
+            int count = shortestPath(anchor);
+            return count > 1;
+        }
+
         public static void printGraph()
         {
             for (int i = 0; i < (width * height); i++)
@@ -117,8 +174,11 @@ namespace IntelligentScissors
         {
             if (!isValidPoint(freePoint))
             {
-                Console.WriteLine("invalid free point try againt!");
-                return null;
+                freePoint = getPoint(freePoint);
+                if (freePoint == -1) { 
+                    Console.WriteLine("invalid free point try againt!");
+                    return null;
+                }
             }
 
             List<int> path = new List<int>();
@@ -133,13 +193,11 @@ namespace IntelligentScissors
             return path;
         }
 
-        public static void shortestPath(int anchorPoint)
+        public static int shortestPath(int anchorPoint)
         {
-            int size = width * height;
+            
             int count = 0;
-
-
-            List<double> cost = new List<double>(Enumerable.Repeat(INF, size).ToArray());
+            List<double> cost = new List<double>(Enumerable.Repeat((1/0.0)+1, size).ToArray());
             parent = new List<int>(Enumerable.Repeat(-1, size).ToArray());
             visited = new List<bool>(Enumerable.Repeat(false, size).ToArray());
             //node, cost 
@@ -169,7 +227,9 @@ namespace IntelligentScissors
                         nextToVisit.Enqueue(destination, cost[destination]);
                     }
                 }
-            }   
+            }
+            Console.WriteLine("count =   " + count);
+            return count;
         }
 
         public static void shortestPathTwoPoints(int anchorPoint, int freePoint)

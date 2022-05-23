@@ -293,7 +293,7 @@ namespace IntelligentScissors
             0,
             0});
             this.frequencyValue.Minimum = new decimal(new int[] {
-            55,
+            25,
             0,
             0,
             0});

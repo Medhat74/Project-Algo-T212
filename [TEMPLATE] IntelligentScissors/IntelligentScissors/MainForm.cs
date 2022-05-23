@@ -90,7 +90,6 @@ namespace IntelligentScissors
                     }
                     
                 }
-                
                 pictureBox1.Invalidate();  
             }
         }
@@ -105,16 +104,23 @@ namespace IntelligentScissors
             {
                 isDrawLiveWire = true;
                 anchorPoint = Graphs.getIndex(clicked_X_Position, clicked_Y_Position);
+                
+                
+                if (!Graphs.isValidAnchorPoint(anchorPoint))
+                {
+                    anchorPoint = Graphs.getAnchorPoint(anchorPoint);
+                }
                 liveWireAnchor = startPoint = anchorPoint;
                 Console.WriteLine("anchor point   " + anchorPoint);
-                Graphs.shortestPath(anchorPoint);
+
             }
             
             else if(!isAutoAnchor)
             {
-                freePoint = Graphs.getIndex(clicked_X_Position, clicked_Y_Position);
-                Console.WriteLine("free point   " + freePoint);
-                putAnchor(freePoint);
+                //freePoint = Graphs.getIndex(clicked_X_Position, clicked_Y_Position);
+                //Console.WriteLine("free point   " + freePoint);
+                putAnchor(Graphs.getIndex(liveWirePoints[0].X, liveWirePoints[0].Y));
+               // Console.WriteLine(anchorPoint);
             }
         }
 
@@ -133,6 +139,8 @@ namespace IntelligentScissors
                         point = Graphs.nodeOfIndex(path[i]);
                         fullPathPoints.Add(point);
                     }
+                    Console.WriteLine("start poin =   "+atPoint+"anchor point =   "+anchorPoint);
+
                 }
                 else
                 {
@@ -150,7 +158,8 @@ namespace IntelligentScissors
                 //New Anchor Point
                 anchorPoint = liveWireAnchor = atPoint;
                 //liveWireAnchor = anchorPoint;
-                Graphs.shortestPathTwoPoints(anchorPoint, startPoint);
+                if (!isDoubleClick)
+                    Graphs.shortestPathTwoPoints(anchorPoint, startPoint);
             }
         }
 
@@ -161,8 +170,6 @@ namespace IntelligentScissors
             {
                 if (isDrawLine)
                 {
-                    Console.WriteLine("draw green");
-
                     e.Graphics.DrawLines(drawPen, fullPathPoints.ToArray());
                 }
                 if (liveWirePoints != null)
@@ -176,9 +183,9 @@ namespace IntelligentScissors
                         }
                     }
                 }
-
-                e.Graphics.DrawLine(liveWirePen, liveWirePoints[0].X,
-                liveWirePoints[0].Y, current_X_Position, current_Y_Position);
+                if (!isDoubleClick)
+                    e.Graphics.DrawLine(liveWirePen, liveWirePoints[0].X,
+                    liveWirePoints[0].Y, current_X_Position, current_Y_Position);
 
             }
 
