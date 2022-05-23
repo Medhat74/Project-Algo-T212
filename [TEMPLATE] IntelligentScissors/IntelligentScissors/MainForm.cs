@@ -22,15 +22,26 @@ namespace IntelligentScissors
         RGBPixel[,] ImageMatrix;
         bool isDrawLine = false, isDrawLiveWire = false, isDoubleClick = false, isAutoAnchor = false;
         public static int current_X_Position, current_Y_Position, clicked_X_Position, clicked_Y_Position;
-        private int startPoint, anchorPoint = -1, freePoint = -1, currentPoint, liveWireAnchor, frequency;
+        private int startPoint, anchorPoint = -1, currentPoint, liveWireAnchor, frequency;
         private List<int> path, liveWire;
         
-        Pen drawPen = new Pen(Color.FromArgb(0, 255, 0), 2);
         Pen liveWirePen = new Pen(Color.FromArgb(255, 0, 0), 2);
+        Pen drawPen = new Pen(Color.FromArgb(0, 255, 0), 2);
+        Pen rectanglePen = new Pen(Color.FromArgb(0, 0, 255), 2);
+
+        Rectangle anchor;
+        Size anchorSize = new Size(3,3);
 
         private List<Point> fullPathPoints = new List<Point>();
+        private List<Point> anchorPointsList = new List<Point>();
         Point[] liveWirePoints;
         
+        /// <summary>
+        /// Load the image and construct the graph 
+        /// Complexity O(1) + O(N^2)
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnOpen_Click(object sender, EventArgs e)
         {
             OpenFileDialog openFileDialog1 = new OpenFileDialog();
@@ -41,32 +52,57 @@ namespace IntelligentScissors
                 ImageMatrix = ImageOperations.OpenImage(OpenedFilePath);
                 ImageOperations.DisplayImage(ImageMatrix, pictureBox1);
             }
-            Graphs.generateGraph(ImageMatrix);
+
+            Graphs.generateGraph(ImageMatrix);    //O(N^2)
         }
+
+        /// <summary>
+        /// Clear drawn wire
+        /// Complexity O(1)
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnClear_Click(object sender, EventArgs e)
         {
             anchorPoint = -1;
             isDrawLiveWire = false;
             isDrawLine = false;
             isDoubleClick = false;
-            
+        
             pictureBox1.Invalidate();
             fullPathPoints.Clear();
-            
-
+            anchorPointsList.Clear();
         }
 
+        /// <summary>
+        /// Start Auto Anchor mode
+        /// Complexity O(1)
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnAutoAnchor_Click(object sender, EventArgs e)
         {
             frequency = (int)frequencyValue.Value;
             isAutoAnchor = true;
         }
 
+        /// <summary>
+        /// Get the new frequency value
+        /// Complexity O(1)
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void frequencyValue_ValueChanged(object sender, EventArgs e)
         {
             frequency = (int)frequencyValue.Value;
             Console.WriteLine(frequency);
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void pictureBox1_MouseMove(object sender, MouseEventArgs e)
         {
             
@@ -78,8 +114,7 @@ namespace IntelligentScissors
 
             if (anchorPoint != -1)
             {
-                currentPoint = Graphs.getIndex(current_X_Position, current_Y_Position);
-                //Graphs.shortestPathTwoPoints(liveWireAnchor, currentPoint);
+                currentPoint = Graphs.getIndex(current_X_Position, current_Y_Position);  //O(1)
                 liveWire = Graphs.getPath(liveWireAnchor, currentPoint);
                 if (liveWire != null)
                 {
@@ -111,16 +146,14 @@ namespace IntelligentScissors
                     anchorPoint = Graphs.getAnchorPoint(anchorPoint);
                 }
                 liveWireAnchor = startPoint = anchorPoint;
+                anchorPointsList.Add(Graphs.nodeOfIndex(anchorPoint));
                 Console.WriteLine("anchor point   " + anchorPoint);
 
             }
             
             else if(!isAutoAnchor)
             {
-                //freePoint = Graphs.getIndex(clicked_X_Position, clicked_Y_Position);
-                //Console.WriteLine("free point   " + freePoint);
                 putAnchor(Graphs.getIndex(liveWirePoints[0].X, liveWirePoints[0].Y));
-               // Console.WriteLine(anchorPoint);
             }
         }
 
@@ -147,19 +180,16 @@ namespace IntelligentScissors
                     for (int i = path.Count - 1; i >= 0; i--)
                     {
                         fullPathPoints.Add(Graphs.nodeOfIndex(path[i]));
-                        //fullPathPoints.Add(liveWirePoints[i]);
                     }
                 }
-                
 
+                anchorPointsList.Add(Graphs.nodeOfIndex(atPoint));
                 isDrawLine = true;
                 pictureBox1.Invalidate();
 
                 //New Anchor Point
                 anchorPoint = liveWireAnchor = atPoint;
-                //liveWireAnchor = anchorPoint;
-                if (!isDoubleClick)
-                    Graphs.shortestPathTwoPoints(anchorPoint, startPoint);
+                Graphs.shortestPathTwoPoints(anchorPoint, startPoint);
             }
         }
 
@@ -171,6 +201,12 @@ namespace IntelligentScissors
                 if (isDrawLine)
                 {
                     e.Graphics.DrawLines(drawPen, fullPathPoints.ToArray());
+                    for(int i = 0; i < anchorPointsList.Count; i++)
+                    {
+                        anchor = new Rectangle(anchorPointsList[i], anchorSize);
+                        e.Graphics.DrawRectangle(rectanglePen, anchor);
+
+                    }
                 }
                 if (liveWirePoints != null)
                 {
@@ -194,7 +230,6 @@ namespace IntelligentScissors
         private void pictureBox1_DoubleClick(object sender, EventArgs e)
         {
             isDoubleClick = true;
-            freePoint = startPoint;
             putAnchor(startPoint);
             anchorPoint = -1;
         }

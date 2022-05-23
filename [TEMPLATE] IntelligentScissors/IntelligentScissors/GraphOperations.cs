@@ -42,41 +42,47 @@ namespace IntelligentScissors
             int y = (index - x) / width;
             return new Point(x, y);
         }
+
+        /// <summary>
+        /// Complexity O(1)
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
         public static int getIndex(int x, int y)
         {
             return (width * y) + x;
         }
-        
+        /// <summary>
+        /// Complexity O(N^2)
+        /// </summary>
+        /// <param name="ImageMatrix"></param>
         public static void generateGraph(RGBPixel[,] ImageMatrix)
         {
             graph = new Graph();
             width = ImageOperations.GetWidth(ImageMatrix);
             height = ImageOperations.GetHeight(ImageMatrix);
             size = width * height;
-            for (int y = 0; y < height; y++)
+
+            //////O(N^2)
+            for (int y = 0; y < height; y++)  //O(N)
             {
-                for (int x = 0; x < width; x++)
+                for (int x = 0; x < width; x++)  //O(N)
                 {
-                    graph[getIndex(x, y)] = new List<CostDestPair>();
+                    graph[getIndex(x, y)] = new List<CostDestPair>();  //O(1)
                 }
             }
 
-            for (int y = 0; y < height; y++)
+
+            //////O(N^2)
+            for (int y = 0; y < height; y++)   //O(N)
             {
-                for (int x = 0; x < width; x++)
+                for (int x = 0; x < width; x++)   //O(N)
                 {
-                    //graph[(X,Y)] is the node
-                    //has list of ( cost, destination node )
-                    // ( cost, (X,Y) )
 
-                    Vector2D cost = ImageOperations.CalculatePixelEnergies(x, y, ImageMatrix);
-                    //cost.X = 1 / cost.X;
-                    //cost.Y = 1 / cost.Y;
-                    //if (cost.X == (1.0 / 0.0))
-                    //    cost.X = 100E+1;
-                    //if (cost.Y == (1.0 / 0.0))
-                    //    cost.Y = 100E+1;
-
+                    Vector2D cost = ImageOperations.CalculatePixelEnergies(x, y, ImageMatrix);  //O(1)
+                    
+                    ///////O(1)
                     if ((x == width - 1) && (y < height - 1))
                     {
                         //No Right Nodes only store Bottom cost
@@ -132,11 +138,11 @@ namespace IntelligentScissors
             Point point = nodeOfIndex(anchorPoint);
             for (int n = 1; n <= 10; n++)
             {
-                for (int i = point.Y - (10 * n); i <= point.Y + (10 * n); i++)
+                for (int i = point.X - (4 * n); i <= point.X + (4 * n); i++)
                 {
-                    for (int j = point.X - (10 * n); j <= point.X + (10 * n); j++)
+                    for (int j = point.Y - (4 * n); j <= point.Y + (4 * n); j++)
                     {
-                        int index = getIndex(j, i);
+                        int index = getIndex(i, j);
                         if (index < size && index > -1)
                         {
                             if (isValidAnchorPoint(index))
@@ -166,12 +172,25 @@ namespace IntelligentScissors
             }
         }
 
+        /// <summary>
+        /// Complexity O(1)
+        /// </summary>
+        /// <param name="point"></param>
+        /// <returns></returns>
         public static bool isValidPoint(int point)
         {
             return visited[point];
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="anchorPoint"></param>
+        /// <param name="freePoint"></param>
+        /// <returns></returns>
         public static List<int> getPath(int anchorPoint, int freePoint)
         {
+            //O(1)
             if (!isValidPoint(freePoint))
             {
                 freePoint = getPoint(freePoint);
@@ -183,6 +202,7 @@ namespace IntelligentScissors
 
             List<int> path = new List<int>();
             int nodesOfPath = freePoint;
+
             while (parent[nodesOfPath] != anchorPoint)
             {
                 path.Add(nodesOfPath);
