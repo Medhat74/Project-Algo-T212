@@ -87,7 +87,7 @@ namespace IntelligentScissors
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label1.Location = new System.Drawing.Point(102, 593);
+            this.label1.Location = new System.Drawing.Point(260, 588);
             this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(162, 24);
@@ -156,7 +156,7 @@ namespace IntelligentScissors
             this.panel2.Location = new System.Drawing.Point(828, 19);
             this.panel2.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(495, 569);
+            this.panel2.Size = new System.Drawing.Size(648, 569);
             this.panel2.TabIndex = 16;
             // 
             // pictureBox2
@@ -179,12 +179,13 @@ namespace IntelligentScissors
             this.btnCrop.TabIndex = 5;
             this.btnCrop.Text = "Crop";
             this.btnCrop.UseVisualStyleBackColor = true;
+            this.btnCrop.Click += new System.EventHandler(this.btnCrop_Click);
             // 
             // label2
             // 
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label2.Location = new System.Drawing.Point(991, 588);
+            this.label2.Location = new System.Drawing.Point(1092, 588);
             this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(154, 24);
@@ -266,14 +267,15 @@ namespace IntelligentScissors
             // 
             // btnAutoAnchor
             // 
+            this.btnAutoAnchor.BackColor = System.Drawing.SystemColors.ControlLightLight;
             this.btnAutoAnchor.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.btnAutoAnchor.Location = new System.Drawing.Point(767, 644);
+            this.btnAutoAnchor.Location = new System.Drawing.Point(685, 644);
             this.btnAutoAnchor.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.btnAutoAnchor.Name = "btnAutoAnchor";
             this.btnAutoAnchor.Size = new System.Drawing.Size(122, 82);
             this.btnAutoAnchor.TabIndex = 24;
             this.btnAutoAnchor.Text = "Auto Anchor";
-            this.btnAutoAnchor.UseVisualStyleBackColor = true;
+            this.btnAutoAnchor.UseVisualStyleBackColor = false;
             this.btnAutoAnchor.Click += new System.EventHandler(this.btnAutoAnchor_Click);
             // 
             // frequencyValue
@@ -285,7 +287,7 @@ namespace IntelligentScissors
             0,
             0,
             0});
-            this.frequencyValue.Location = new System.Drawing.Point(923, 675);
+            this.frequencyValue.Location = new System.Drawing.Point(828, 675);
             this.frequencyValue.Margin = new System.Windows.Forms.Padding(4);
             this.frequencyValue.Maximum = new decimal(new int[] {
             150,
@@ -311,7 +313,7 @@ namespace IntelligentScissors
             // 
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label3.Location = new System.Drawing.Point(918, 650);
+            this.label3.Location = new System.Drawing.Point(828, 647);
             this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(99, 21);
@@ -322,7 +324,7 @@ namespace IntelligentScissors
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1361, 769);
+            this.ClientSize = new System.Drawing.Size(1497, 769);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.btnAutoAnchor);
             this.Controls.Add(this.frequencyValue);
